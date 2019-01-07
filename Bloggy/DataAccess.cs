@@ -66,5 +66,31 @@ namespace Bloggy
             //};
 
         }
+
+        internal BlogPost GetPostById(int postId)
+        {
+            var sql = @"SELECT BlogpostId, Author, Title
+                        FROM BlogPostNEW2 WHERE BlogpostId = " + postId;
+
+            using (SqlConnection connection = new SqlConnection(conString))
+            using (SqlCommand command = new SqlCommand(sql, connection))
+            {
+                connection.Open();
+
+                SqlDataReader reader = command.ExecuteReader();
+
+                reader.Read();
+
+                var blogPost = new BlogPost
+                {
+                    Id = reader.GetSqlInt32(0).Value,
+                    Author = reader.GetSqlString(1).Value,
+                    Title = reader.GetSqlString(2).Value
+                };
+
+                return blogPost;
+
+            }
+        }
     }
 }
