@@ -67,6 +67,24 @@ namespace Bloggy
 
         }
 
+        internal void UpdateBlogpost(BlogPost blogpost)
+        {
+            var sql = @"UPDATE Blogpost
+                        SET Blogpost.Title = @Title
+                        WHERE BlogpostId = @Id";
+
+            using (SqlConnection connection = new SqlConnection(conString))
+            using (SqlCommand command = new SqlCommand(sql, connection))
+            {
+                connection.Open();
+                command.Parameters.Add(new SqlParameter("Title", blogpost.Title));
+                command.Parameters.Add(new SqlParameter("Id", blogpost.Id));
+
+                SqlDataReader reader = command.ExecuteReader();
+
+            }
+        }
+
         internal BlogPost GetPostById(int postId)
         {
             var sql = @"SELECT BlogpostId, Author, Title

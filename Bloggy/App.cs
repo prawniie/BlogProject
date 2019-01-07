@@ -48,6 +48,18 @@ namespace Bloggy
             BlogPost blogpost = dataAccess.GetPostById(postId);
 
             Console.WriteLine($"Den nuvarande titeln är {blogpost.Title}");
+
+            Console.Write("Skriv in ny titel: ");
+
+            string newTitle = Console.ReadLine();
+
+            blogpost.Title = newTitle;
+
+            dataAccess.UpdateBlogpost(blogpost);
+
+            Console.WriteLine("Bloggposten uppdaterad.");
+            Console.ReadKey();
+            PageMainMenu();
             //string input = Console.ReadLine();
             //int.TryParse(input, out int blogId);
 
