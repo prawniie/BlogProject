@@ -29,6 +29,7 @@ namespace Bloggy
             WriteLine("b) Uppdatera en bloggpost");
             WriteLine("c) Radera en bloggpost");
             WriteLine("d) Skapa ny bloggpost");
+            WriteLine("e) Läs blogginlägg");
 
             ConsoleKey command = Console.ReadKey(true).Key; //true gör att värdet inte skrivs ut på skärmen
 
@@ -43,6 +44,31 @@ namespace Bloggy
 
             if (command == ConsoleKey.D)
                 PageCreatePost();
+
+            if (command == ConsoleKey.E)
+                PageReadPost();
+        }
+
+        private void PageReadPost()
+        {
+            Header("Blogginlägg");
+
+            ShowAllBlogPostsBrief();
+
+            Console.Write("Välj inlägg att läsa: ");
+            int postId = int.Parse(Console.ReadLine());
+            BlogPost blogpost = dataAccess.GetFullPostById(postId);
+
+            Console.Clear();
+            Header($"Titel: {blogpost.Title}\n");
+            WriteLine(blogpost.Description);
+            WriteLine($"\nSkriven av {blogpost.Author}");
+            WriteLine($"Skapad den {blogpost.Created}");
+
+            Console.ReadKey();
+            PageMainMenu();
+
+
         }
 
         private void PageCreatePost()
@@ -62,9 +88,22 @@ namespace Bloggy
 
             blogPost.Created = DateTime.Now;
 
-
-
             dataAccess.CreateBlogpost(blogPost);
+
+            WriteLine("Lägg till taggar:");
+            while (true)
+            {
+                string input = Console.ReadLine();
+
+                if (input.Trim() == "")
+                    break;
+
+                Tag tag = new Tag();
+                tag.Name = input;
+                blogPost.Tags.Add(tag);
+            }
+
+            dataAccess.CreateTags(blogPost);
 
             WriteLine("Bloggposten är skapad!");
             Console.ReadKey();
