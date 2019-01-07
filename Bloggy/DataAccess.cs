@@ -69,8 +69,8 @@ namespace Bloggy
 
         internal void UpdateBlogpost(BlogPost blogpost)
         {
-            var sql = @"UPDATE Blogpost
-                        SET Blogpost.Title = @Title
+            var sql = @"UPDATE BlogpostNEW2
+                        SET Title = @Title
                         WHERE BlogpostId = @Id";
 
             using (SqlConnection connection = new SqlConnection(conString))
@@ -80,8 +80,7 @@ namespace Bloggy
                 command.Parameters.Add(new SqlParameter("Title", blogpost.Title));
                 command.Parameters.Add(new SqlParameter("Id", blogpost.Id));
 
-                SqlDataReader reader = command.ExecuteReader();
-
+                command.ExecuteNonQuery();
             }
         }
 
