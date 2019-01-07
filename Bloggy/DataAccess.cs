@@ -16,7 +16,7 @@ namespace Bloggy
         {
 
             var sql = @"SELECT BlogpostId, Author, Title
-                        FROM BlogPostNEW2";
+                        FROM Blogpost";
 
             using (SqlConnection connection = new SqlConnection(conString))
             using (SqlCommand command = new SqlCommand(sql, connection))
@@ -67,9 +67,43 @@ namespace Bloggy
 
         }
 
+        internal void CreateBlogpost(BlogPost blogPost)
+        {
+            var sql = @"INSERT INTO Blogpost(Title,Description,Author,Created)
+                        VALUES(@Title,@Description,@Author,@Created) ";
+
+            using (SqlConnection connection = new SqlConnection(conString))
+            using (SqlCommand command = new SqlCommand(sql, connection))
+            {
+                connection.Open();
+                command.Parameters.Add(new SqlParameter("Title", blogPost.Title));
+                command.Parameters.Add(new SqlParameter("Description", blogPost.Description));
+                command.Parameters.Add(new SqlParameter("Author", blogPost.Author));
+                command.Parameters.Add(new SqlParameter("Created", blogPost.Created));
+
+                command.ExecuteNonQuery();
+            }
+
+        }
+
+        internal void DeleteBlogpost(BlogPost blogpost)
+        {
+            var sql = @"DELETE FROM Blogpost
+                        WHERE BlogpostId = @Id";
+
+            using (SqlConnection connection = new SqlConnection(conString))
+            using (SqlCommand command = new SqlCommand(sql, connection))
+            {
+                connection.Open();
+                command.Parameters.Add(new SqlParameter("Id", blogpost.Id));
+                command.ExecuteNonQuery();
+            }
+
+        }
+
         internal void UpdateBlogpost(BlogPost blogpost)
         {
-            var sql = @"UPDATE BlogpostNEW2
+            var sql = @"UPDATE Blogpost
                         SET Title = @Title
                         WHERE BlogpostId = @Id";
 
@@ -79,7 +113,6 @@ namespace Bloggy
                 connection.Open();
                 command.Parameters.Add(new SqlParameter("Title", blogpost.Title));
                 command.Parameters.Add(new SqlParameter("Id", blogpost.Id));
-
                 command.ExecuteNonQuery();
             }
         }
@@ -87,7 +120,7 @@ namespace Bloggy
         internal BlogPost GetPostById(int postId)
         {
             var sql = @"SELECT BlogpostId, Author, Title
-                        FROM BlogPostNEW2 WHERE BlogpostId=@Id";
+                        FROM Blogpost WHERE BlogpostId=@Id";
 
             using (SqlConnection connection = new SqlConnection(conString))
             using (SqlCommand command = new SqlCommand(sql, connection))

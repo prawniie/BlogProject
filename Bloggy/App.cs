@@ -11,6 +11,7 @@ namespace Bloggy
 
     {
         DataAccess dataAccess = new DataAccess();
+        //Konvention egentligen att göra _dataAccess när det är privata fält
 
         public void Run()
         {
@@ -26,6 +27,8 @@ namespace Bloggy
             WriteLine("Vad vill du göra?");
             WriteLine("a) Gå till huvudmenyn");
             WriteLine("b) Uppdatera en bloggpost");
+            WriteLine("c) Radera en bloggpost");
+            WriteLine("d) Skapa ny bloggpost");
 
             ConsoleKey command = Console.ReadKey(true).Key; //true gör att värdet inte skrivs ut på skärmen
 
@@ -34,6 +37,58 @@ namespace Bloggy
 
             if (command == ConsoleKey.B)
                 PageUpdatePost();
+
+            if (command == ConsoleKey.C)
+                PageDeletePost();
+
+            if (command == ConsoleKey.D)
+                PageCreatePost();
+        }
+
+        private void PageCreatePost()
+        {
+            BlogPost blogPost = new BlogPost();
+
+            Header("Ny blogpost");
+
+            Console.Write("Författare: ");
+            blogPost.Author = Console.ReadLine();
+
+            Console.Write("Titel: ");
+            blogPost.Title = Console.ReadLine();
+
+            WriteLine("\nSkriv text här:");
+            blogPost.Description = Console.ReadLine();
+
+            blogPost.Created = DateTime.Now;
+
+
+
+            dataAccess.CreateBlogpost(blogPost);
+
+            WriteLine("Bloggposten är skapad!");
+            Console.ReadKey();
+            PageMainMenu();
+        }
+
+        private void PageDeletePost()
+        {
+            Header("Radera");
+
+            ShowAllBlogPostsBrief();
+
+            Console.Write("Vilken bloggpost vill du radera? ");
+            int postId = int.Parse(Console.ReadLine());
+
+            BlogPost blogpost = dataAccess.GetPostById(postId);
+
+            Console.WriteLine($"Den bloggpost du vill radera är alltså '{blogpost.Title}'");
+
+            dataAccess.DeleteBlogpost(blogpost);
+            Console.WriteLine("Bloggposten är raderad.");
+            Console.ReadKey();
+            PageMainMenu();
+
         }
 
         private void PageUpdatePost()
