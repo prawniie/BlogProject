@@ -38,7 +38,6 @@ namespace Bloggy
 
         private void PageUpdatePost()
         {
-
             Header("Uppdatera");
 
             ShowAllBlogPostsBrief();
