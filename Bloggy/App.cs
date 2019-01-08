@@ -59,7 +59,7 @@ namespace Bloggy
 
             while (true)
             {
-                WriteLine("Skriv in tagg: ");
+                Console.Write("Skriv in tagg: ");
                 string input = Console.ReadLine();
 
                 if (input.Trim() == "")

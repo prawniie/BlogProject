@@ -122,18 +122,9 @@ namespace Bloggy
 
         internal void AddToBlogpostTagTable(Tag tag, BlogPost blogPost)
         {
+            int blogPostId = GetIdOnBlogpost(blogPost);
 
-            //int blogPostId = GetIdOnBlogpost(blogPost);
-
-            //Anv sql:
-            //select blogPostId from Blogpost where Name == blogPost.Name
-            //tex select blogPostId from Blogpost where Title == 'Morgon'
-
-            //int tagId = GetIdOnTag(tag);
-
-            //Anv sql: 
-            //select TagId from Tag where Name == tag.Name
-            //tex select TagId from Tag where Name = 'Hundar'
+            int tagId = GetIdOnTag(tag);
 
             var sql = @"INSERT INTO BlogpostTag(BlogpostId, TagId)
                         VALUES (@Id,@Tag)";
@@ -142,21 +133,75 @@ namespace Bloggy
             using (SqlCommand command = new SqlCommand(sql, connection))
             {
                 connection.Open();
-                command.Parameters.Add(new SqlParameter("Id", blogPost.Id)); //Just nu är id = 0, måste hämta från db
-                command.Parameters.Add(new SqlParameter("Tag", tag.Id)); //just nu är id = 0, måste hämta från db
+                command.Parameters.Add(new SqlParameter("Id", blogPostId));
+                command.Parameters.Add(new SqlParameter("Tag", tagId));
 
                 command.ExecuteNonQuery();
             }
         }
 
+        private int GetIdOnTag(Tag tag)
+        {
+
+            var sql = @"SELECT TagId FROM Tag
+                        WHERE Name = @Name";
+
+            int tagId = 0;
+
+            using (SqlConnection connection = new SqlConnection(conString))
+            using (SqlCommand command = new SqlCommand(sql, connection))
+            {
+                connection.Open();
+                command.Parameters.Add(new SqlParameter("Name", tag.Name));
+
+                SqlDataReader reader = command.ExecuteReader();
+
+                if (reader.Read())
+                {
+                    tagId = reader.GetInt32(0);
+                    return tagId;
+                }
+
+                return tagId;
+            }
+        }
+
+        private int GetIdOnBlogpost(BlogPost blogPost)
+        {
+            var sql = @"SELECT BlogpostId FROM Blogpost
+                        WHERE Title = @Title";
+
+            int blogPostId = 0;
+
+            using (SqlConnection connection = new SqlConnection(conString))
+            using (SqlCommand command = new SqlCommand(sql, connection))
+            {
+                connection.Open();
+                command.Parameters.Add(new SqlParameter("Title", blogPost.Title));
+
+                SqlDataReader reader = command.ExecuteReader();
+
+                if (reader.Read())
+                {
+                    blogPostId = reader.GetInt32(0);
+                    return blogPostId;
+                }
+
+                return blogPostId;
+            }
+         }
+
         internal void CreateTags(BlogPost blogPost)
         {
             CheckIfTagExist(blogPost);
+
+            Console.WriteLine($"Följande taggar har lagts till: {string.Join(',',blogPost.Tags.Select(b => b.Name))}");
         }
 
         internal void CreateTags(Tag tag)
         {
             CheckIfTagExist(tag);
+
         }
 
         private void CheckIfTagExist(Tag tag)
@@ -184,7 +229,10 @@ namespace Bloggy
                 if(!tagsInDatabase.Select(t=> t.Name).Contains(tag.Name))
                 {
                     AddTagToDatabase(tag.Name.ToString());
+                    Console.WriteLine($"Taggen '{tag.Name}' har lagts till!");
                 }
+                else
+                    Console.WriteLine($"Taggen '{tag.Name}' finns redan!");
             }
         }
 
@@ -220,7 +268,6 @@ namespace Bloggy
 
                     AddTagToDatabase(tag.Name.ToString());
                     AddToBlogpostTagTable(tag, blogPost);
-
                 }
             }
         }
