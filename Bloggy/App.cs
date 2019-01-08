@@ -22,35 +22,31 @@ namespace Bloggy
         {
             Header("Huvudmeny");
 
-            ShowAllBlogPostsBrief();
+            //ShowAllBlogPostsBrief();
 
-            WriteLine("Vad vill du göra?");
-            WriteLine("a) Gå till huvudmenyn");
-            WriteLine("b) Uppdatera en bloggpost");
-            WriteLine("c) Radera en bloggpost");
-            WriteLine("d) Skapa ny bloggpost");
-            WriteLine("e) Läs blogginlägg");
-            WriteLine("f) Lägg till taggar");
+            WriteLine("a) Skapa nytt blogginlägg");
+            WriteLine("b) Läs blogginlägg");
+            WriteLine("c) Uppdatera blogginlägg");
+            WriteLine("d) Radera blogginlägg");
+            WriteLine("e) Lägg till taggar");
 
             ConsoleKey command = Console.ReadKey(true).Key; //true gör att värdet inte skrivs ut på skärmen
 
             if (command == ConsoleKey.A)
-                PageMainMenu();
-
-            if (command == ConsoleKey.B)
-                PageUpdatePost();
-
-            if (command == ConsoleKey.C)
-                PageDeletePost();
-
-            if (command == ConsoleKey.D)
                 PageCreatePost();
 
-            if (command == ConsoleKey.E)
+            if (command == ConsoleKey.B)
                 PageReadPost();
 
-            if (command == ConsoleKey.F)
+            if (command == ConsoleKey.C)
+                PageUpdatePost();
+
+            if (command == ConsoleKey.D)
+                PageDeletePost();
+
+            if (command == ConsoleKey.E)
                 PageCreateTags();
+
         }
 
         private void PageCreateTags()
@@ -72,7 +68,8 @@ namespace Bloggy
 
                 dataAccess.CreateTags(tag);
             }
-
+            WriteLine("\nTryck på valfri knapp för att gå tillbaka till huvudmenyn");
+            Console.ReadKey();
             PageMainMenu();
         }
 
@@ -94,17 +91,22 @@ namespace Bloggy
             WriteLine($"\nSkriven av {blogpost.Author}");
             WriteLine($"Skapad den {blogpost.Created}");
 
+            List<Tag> blogPostTags = dataAccess.GetTagsFromId(blogpost);
+            Console.WriteLine($"Taggar: {string.Join(',', blogPostTags.Select(b => b.Name))}");
+
+            Console.WriteLine("\nSkriv en kommentar: ");
+            //CreateComment();
+
+            WriteLine("\nTryck på valfri knapp för att gå tillbaka till huvudmenyn");
             Console.ReadKey();
             PageMainMenu();
-
-
         }
 
         private void PageCreatePost()
         {
             BlogPost blogPost = new BlogPost();
 
-            Header("Ny blogpost");
+            Header("Nytt blogginlägg");
 
             Console.Write("Författare: ");
             blogPost.Author = Console.ReadLine();
@@ -119,7 +121,7 @@ namespace Bloggy
 
             dataAccess.CreateBlogpost(blogPost);
 
-            WriteLine("Lägg till taggar:");
+            WriteLine("\nLägg till taggar:");
             while (true)
             {
                 string input = Console.ReadLine();
@@ -134,7 +136,8 @@ namespace Bloggy
 
             dataAccess.CreateTags(blogPost);
 
-            WriteLine("Bloggposten är skapad!");
+            WriteGreen("Blogginlägget är skapat!");
+            WriteLine("\nTryck på valfri knapp för att gå tillbaka till huvudmenyn");
             Console.ReadKey();
             PageMainMenu();
         }
@@ -145,12 +148,12 @@ namespace Bloggy
 
             ShowAllBlogPostsBrief();
 
-            Console.Write("Vilken bloggpost vill du radera? ");
+            Console.Write("Vilket blogginlägg vill du radera? ");
             int postId = int.Parse(Console.ReadLine());
 
             BlogPost blogpost = dataAccess.GetPostById(postId);
 
-            Console.WriteLine($"Den bloggpost du vill radera är alltså '{blogpost.Title}'?");
+            Console.WriteLine($"Det blogginlägg du vill radera är alltså '{blogpost.Title}'?");
             string input = Console.ReadLine();
 
             switch (input.ToLower())
@@ -158,7 +161,7 @@ namespace Bloggy
                 case "ja":
                     dataAccess.DeleteBlogpostInBlogpostTagTable(blogpost);
                     dataAccess.DeleteBlogpost(blogpost);
-                    Console.WriteLine("Bloggposten är raderad.");
+                    WriteGreen("\nBlogginlägget är raderat.");
                     Console.ReadKey();
                     PageMainMenu();
                     break;
@@ -181,7 +184,7 @@ namespace Bloggy
 
             ShowAllBlogPostsBrief();
 
-            Console.Write("Vilken bloggpost vill du uppdatera? ");
+            Console.Write("Vilket blogginlägg vill du uppdatera? ");
             int postId = int.Parse(Console.ReadLine());
 
             BlogPost blogpost = dataAccess.GetPostById(postId);
@@ -196,7 +199,7 @@ namespace Bloggy
 
             dataAccess.UpdateBlogpost(blogpost);
 
-            Console.WriteLine("Bloggposten uppdaterad.");
+            WriteGreen("Blogginlägget är uppdaterat.");
             Console.ReadKey();
             PageMainMenu();
             //string input = Console.ReadLine();
@@ -253,6 +256,13 @@ namespace Bloggy
             Console.WriteLine(text.ToUpper());
             Console.ResetColor();
             Console.WriteLine();
+        }
+
+        private void WriteGreen(string text)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine(text);
+            Console.ResetColor();
         }
     }
 }

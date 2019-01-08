@@ -15,7 +15,6 @@ namespace Bloggy
 
         internal List<BlogPost> GetAllBlogPostsBrief()
         {
-
             var sql = @"SELECT BlogpostId, Author, Title
                         FROM Blogpost";
 
@@ -38,10 +37,8 @@ namespace Bloggy
                     };
                     list.Add(bp);
                 }
-
                 return list;
             }
-
             //return new List<BlogPost>
             //{
             //new BlogPost
@@ -65,16 +62,13 @@ namespace Bloggy
             //        Title = "Lunch"
             //    }
             //};
-
         }
 
         internal BlogPost GetFullPostById(int postId)
         {
-            var sql = @"SELECT Blogpost.Title, Blogpost.Description, Blogpost.Author, Blogpost.Created, Tag.Name
+            var sql = @"SELECT Title, Description, Author, Created, BlogpostId
                         FROM Blogpost
-                        FULL JOIN BlogpostTag ON Blogpost.BlogpostId = BlogpostTag.BlogpostId
-                        FULL JOIN Tag ON BlogpostTag.TagId = Tag.TagId
-                        WHERE Blogpost.BlogpostId=@Id";
+                        WHERE BlogpostId=@Id";
 
             using (SqlConnection connection = new SqlConnection(conString))
             using (SqlCommand command = new SqlCommand(sql, connection))
@@ -91,13 +85,39 @@ namespace Bloggy
                         Title = reader.GetSqlString(0).Value,
                         Description = reader.GetSqlString(1).Value,
                         Author = reader.GetSqlString(2).Value,
-                        Created = reader.GetSqlDateTime(3).Value
-                        //Tags = reader.GetSqlString(2).Value.ToList()
+                        Created = reader.GetSqlDateTime(3).Value,
+                        Id = reader.GetSqlInt32(4).Value
                     };
                     return blogPost;
                 }
-
                 return null;
+            }
+        }
+
+        internal List<Tag> GetTagsFromId(BlogPost blogpost)
+        {
+            var sql = @"SELECT Tag.Name 
+                        FROM Tag
+                        FULL JOIN BlogpostTag ON BlogpostTag.TagId = Tag.TagId
+                        WHERE BlogpostTag.BlogpostId = @Id";
+
+            List<Tag> blogPostTags = new List<Tag>();
+
+            using (SqlConnection connection = new SqlConnection(conString))
+            using (SqlCommand command = new SqlCommand(sql, connection))
+            {
+                connection.Open();
+                command.Parameters.Add(new SqlParameter("Id", blogpost.Id));
+
+                SqlDataReader reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    var tag = new Tag();
+                    tag.Name = reader.GetSqlString(0).Value;
+                    blogPostTags.Add(tag);
+                }
+                return blogPostTags;
             }
         }
 
@@ -242,10 +262,16 @@ namespace Bloggy
                 if(!tagsInDatabase.Select(t=> t.Name).Contains(tag.Name))
                 {
                     AddTagToDatabase(tag.Name.ToString());
+                    Console.ForegroundColor = ConsoleColor.Green;
                     Console.WriteLine($"Taggen '{tag.Name}' har lagts till!");
+                    Console.ResetColor();
                 }
                 else
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine($"Taggen '{tag.Name}' finns redan!");
+                    Console.ResetColor();
+                }
             }
         }
 
