@@ -60,8 +60,10 @@ namespace Bloggy
             BlogPost blogpost = dataAccess.GetFullPostById(postId);
 
             Console.Clear();
-            Header($"Titel: {blogpost.Title}\n");
-            WriteLine(blogpost.Description);
+            Header($"Titel: {blogpost.Title}");
+            WriteLine("__________________________________________________________________");
+            WriteLine($"\n{blogpost.Description}");
+            WriteLine("__________________________________________________________________");
             WriteLine($"\nSkriven av {blogpost.Author}");
             WriteLine($"Skapad den {blogpost.Created}");
 
@@ -121,13 +123,28 @@ namespace Bloggy
 
             BlogPost blogpost = dataAccess.GetPostById(postId);
 
-            Console.WriteLine($"Den bloggpost du vill radera är alltså '{blogpost.Title}'");
+            Console.WriteLine($"Den bloggpost du vill radera är alltså '{blogpost.Title}'?");
+            string input = Console.ReadLine();
 
-            dataAccess.DeleteBlogpost(blogpost);
-            Console.WriteLine("Bloggposten är raderad.");
-            Console.ReadKey();
-            PageMainMenu();
-
+            switch (input.ToLower())
+            {
+                case "ja":
+                    dataAccess.DeleteBlogpost(blogpost);
+                    Console.WriteLine("Bloggposten är raderad.");
+                    Console.ReadKey();
+                    PageMainMenu();
+                    break;
+                case "nej":
+                    WriteLine("\nTryck på valfri knapp för att gå tillbaka till huvudmenyn");
+                    Console.ReadKey();
+                    PageMainMenu();
+                    break;
+                default:
+                    WriteLine("Vänligen skriv 'ja' eller 'nej'");
+                    Console.ReadKey();
+                    PageDeletePost();
+                    break;
+            }
         }
 
         private void PageUpdatePost()
