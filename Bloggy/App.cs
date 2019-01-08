@@ -30,6 +30,7 @@ namespace Bloggy
             WriteLine("c) Radera en bloggpost");
             WriteLine("d) Skapa ny bloggpost");
             WriteLine("e) Läs blogginlägg");
+            WriteLine("f) Lägg till taggar");
 
             ConsoleKey command = Console.ReadKey(true).Key; //true gör att värdet inte skrivs ut på skärmen
 
@@ -47,6 +48,32 @@ namespace Bloggy
 
             if (command == ConsoleKey.E)
                 PageReadPost();
+
+            if (command == ConsoleKey.F)
+                PageCreateTags();
+        }
+
+        private void PageCreateTags()
+        {
+            Header("Skapa taggar");
+
+            while (true)
+            {
+                WriteLine("Skriv in tagg: ");
+                string input = Console.ReadLine();
+
+                if (input.Trim() == "")
+                {
+                    break;
+                }
+
+                var tag = new Tag();
+                tag.Name = input;
+
+                dataAccess.CreateTags(tag);
+            }
+
+            PageMainMenu();
         }
 
         private void PageReadPost()

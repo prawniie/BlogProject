@@ -120,22 +120,72 @@ namespace Bloggy
 
         }
 
+        internal void AddToBlogpostTagTable(Tag tag, BlogPost blogPost)
+        {
+
+            //int blogPostId = GetIdOnBlogpost(blogPost);
+
+            //Anv sql:
+            //select blogPostId from Blogpost where Name == blogPost.Name
+            //tex select blogPostId from Blogpost where Title == 'Morgon'
+
+            //int tagId = GetIdOnTag(tag);
+
+            //Anv sql: 
+            //select TagId from Tag where Name == tag.Name
+            //tex select TagId from Tag where Name = 'Hundar'
+
+            var sql = @"INSERT INTO BlogpostTag(BlogpostId, TagId)
+                        VALUES (@Id,@Tag)";
+
+            using (SqlConnection connection = new SqlConnection(conString))
+            using (SqlCommand command = new SqlCommand(sql, connection))
+            {
+                connection.Open();
+                command.Parameters.Add(new SqlParameter("Id", blogPost.Id)); //Just nu är id = 0, måste hämta från db
+                command.Parameters.Add(new SqlParameter("Tag", tag.Id)); //just nu är id = 0, måste hämta från db
+
+                command.ExecuteNonQuery();
+            }
+        }
+
         internal void CreateTags(BlogPost blogPost)
         {
-            //Kolla om taggen redan existerar, om ej så lägg till i tabellen Tag
             CheckIfTagExist(blogPost);
-            
-            //Lägg till data i tag-tabellen
+        }
 
-            //var sql = @"INSERT INTO Tag(Name)
-            //            VALUES(@Name)";
+        internal void CreateTags(Tag tag)
+        {
+            CheckIfTagExist(tag);
+        }
 
-            //using (SqlConnection connection = new SqlConnection(conString))
-            //using (SqlCommand command = new SqlCommand(sql, connection))
-            //{
-            //    connection.Open();
-            //    command.ExecuteNonQuery();
-            //}
+        private void CheckIfTagExist(Tag tag)
+        {
+            var sql = @"SELECT Name
+                        FROM Tag"; //Får alla tagnamnen i tabellen Tag
+
+            List<Tag> tagsInDatabase = new List<Tag>(); //Sparar alla taggnamnen i en lista av taggar
+
+            using (SqlConnection connection = new SqlConnection(conString))
+            using (SqlCommand command = new SqlCommand(sql, connection))
+            {
+                connection.Open();
+                SqlDataReader reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    var tagDB = new Tag
+                    {
+                        Name = reader.GetSqlString(0).Value,
+                    };
+                    tagsInDatabase.Add(tagDB);
+                }
+
+                if(!tagsInDatabase.Select(t=> t.Name).Contains(tag.Name))
+                {
+                    AddTagToDatabase(tag.Name.ToString());
+                }
+            }
         }
 
         private void CheckIfTagExist(BlogPost blogPost)
@@ -143,8 +193,7 @@ namespace Bloggy
             var sql = @"SELECT Name
                         FROM Tag"; //Får alla tagnamnen i tabellen Tag
 
-            List<Tag> tagsInDatabase = new List<Tag>();
-
+            List<Tag> tagsInDatabase = new List<Tag>(); //Sparar alla taggnamnen i en lista av taggar
 
             using (SqlConnection connection = new SqlConnection(conString))
             using (SqlCommand command = new SqlCommand(sql, connection))
@@ -153,9 +202,7 @@ namespace Bloggy
 
                 SqlDataReader reader = command.ExecuteReader();
 
-                //Sparar alla taggnamnen i en lista av taggar
-
-                if (reader.Read())
+                while (reader.Read())
                 {
                     var tag = new Tag
                     {
@@ -166,14 +213,17 @@ namespace Bloggy
 
                 foreach (var tag in blogPost.Tags)
                 {
-                    if (!tagsInDatabase.Contains(tag))
+                    if (tagsInDatabase.Select(t=>t.Name).Contains(tag.Name))
                     {
-                        AddTagToDatabase(tag.Name.ToString());
+                        continue;
                     }
+
+                    AddTagToDatabase(tag.Name.ToString());
+                    AddToBlogpostTagTable(tag, blogPost);
+
                 }
             }
-
-            }
+        }
 
         private void AddTagToDatabase(string tagName)
         {
@@ -187,8 +237,6 @@ namespace Bloggy
                 command.Parameters.Add(new SqlParameter("tagName", tagName));
                 command.ExecuteNonQuery();
             }
-
-
         }
 
         internal void DeleteBlogpost(BlogPost blogpost)
