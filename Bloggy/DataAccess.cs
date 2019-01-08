@@ -12,6 +12,7 @@ namespace Bloggy
     {
         private string conString = "Server=(localdb)\\mssqllocaldb; Database=Blogposts";
 
+
         internal List<BlogPost> GetAllBlogPostsBrief()
         {
 
@@ -121,22 +122,73 @@ namespace Bloggy
 
         internal void CreateTags(BlogPost blogPost)
         {
+            //Kolla om taggen redan existerar, om ej så lägg till i tabellen Tag
+            CheckIfTagExist(blogPost);
+            
             //Lägg till data i tag-tabellen
 
-            var sql = @"INSERT INTO Tag(Name)
-                        VALUES(@Name)";
+            //var sql = @"INSERT INTO Tag(Name)
+            //            VALUES(@Name)";
+
+            //using (SqlConnection connection = new SqlConnection(conString))
+            //using (SqlCommand command = new SqlCommand(sql, connection))
+            //{
+            //    connection.Open();
+            //    command.ExecuteNonQuery();
+            //}
+        }
+
+        private void CheckIfTagExist(BlogPost blogPost)
+        {
+            var sql = @"SELECT Name
+                        FROM Tag"; //Får alla tagnamnen i tabellen Tag
+
+            List<Tag> tagsInDatabase = new List<Tag>();
+
 
             using (SqlConnection connection = new SqlConnection(conString))
             using (SqlCommand command = new SqlCommand(sql, connection))
             {
                 connection.Open();
 
+                SqlDataReader reader = command.ExecuteReader();
+
+                //Sparar alla taggnamnen i en lista av taggar
+
+                if (reader.Read())
+                {
+                    var tag = new Tag
+                    {
+                        Name = reader.GetSqlString(0).Value,
+                    };
+                    tagsInDatabase.Add(tag);
+                }
+
                 foreach (var tag in blogPost.Tags)
                 {
-                    command.Parameters.Add(new SqlParameter("Name", tag.Name));
+                    if (!tagsInDatabase.Contains(tag))
+                    {
+                        AddTagToDatabase(tag.Name.ToString());
+                    }
                 }
+            }
+
+            }
+
+        private void AddTagToDatabase(string tagName)
+        {
+            var sql = @"INSERT INTO Tag(Name)
+                        VALUES (@tagName)";
+
+            using (SqlConnection connection = new SqlConnection(conString))
+            using (SqlCommand command = new SqlCommand(sql, connection))
+            {
+                connection.Open();
+                command.Parameters.Add(new SqlParameter("tagName", tagName));
                 command.ExecuteNonQuery();
             }
+
+
         }
 
         internal void DeleteBlogpost(BlogPost blogpost)
