@@ -140,6 +140,19 @@ namespace Bloggy
             }
         }
 
+        internal void DeleteBlogpostInBlogpostTagTable(BlogPost blogpost)
+        {
+            var sql = "DELETE FROM BlogpostTag WHERE BlogpostId = @Id";
+
+            using (SqlConnection connection = new SqlConnection(conString))
+            using (SqlCommand command = new SqlCommand(sql, connection))
+            {
+                connection.Open();
+                command.Parameters.Add(new SqlParameter("Id", blogpost.Id));
+                command.ExecuteNonQuery();
+            }
+        }
+
         private int GetIdOnTag(Tag tag)
         {
 

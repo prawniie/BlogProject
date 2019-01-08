@@ -156,6 +156,7 @@ namespace Bloggy
             switch (input.ToLower())
             {
                 case "ja":
+                    dataAccess.DeleteBlogpostInBlogpostTagTable(blogpost);
                     dataAccess.DeleteBlogpost(blogpost);
                     Console.WriteLine("Bloggposten är raderad.");
                     Console.ReadKey();
